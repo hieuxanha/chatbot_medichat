@@ -1,0 +1,46 @@
+medical-chatbot-api/
+├── src/main/java/com/hieu/medichat/
+│   ├── config/                # Cấu hình App, Security (JWT), Cloud/AI SDK
+│   ├── controller/            # API Endpoints
+│   │   ├── AuthController.java      # Đăng nhập/Đăng ký
+│   │   ├── ChatController.java      # Gửi/nhận tin nhắn tư vấn
+│   │   └── UserController.java      # Thông tin cá nhân bệnh nhân
+│   ├── dto/                   # Request/Response objects
+│   │   ├── request/                 # LoginRequest, ChatRequest
+│   │   └── response/                # JwtResponse, ChatResponse
+│   ├── entity/                # Database Entities (MySQL/PostgreSQL)
+│   │   ├── User.java
+│   │   ├── Conversation.java        # Lưu phiên chat
+│   │   └── Message.java             # Chi tiết từng tin nhắn
+│   ├── repository/            # JpaRepository cho User, Message
+│   ├── service/               # Logic nghiệp vụ
+│   │   ├── AuthService.java
+│   │   ├── ChatService.java         # Điều hướng tin nhắn đến AI
+│   │   └── MedicalAdviceService.java # Logic xử lý luật y tế cơ bản
+│   ├── integration/           # Kết nối với API AI (OpenAI, Gemini, v.v.)
+│   │   └── AIClient.java
+│   └── exception/             # Custom Error Handling
+├── src/main/resources/
+│   └── application.yml        # Cấu hình DB và API Key AI
+└── pom.xml 
+
+medical-chatbot-ui/
+├── src/app/
+│   ├── core/                  # Singleton services, Interceptors (Auth)
+│   │   ├── guards/            # Bảo vệ route (chưa login không vào được chat)
+│   │   ├── interceptors/      # Đính kèm Token vào mỗi Request
+│   │   └── services/          # auth.service.ts, chat.service.ts
+│   ├── shared/                # UI chung (Loading spinner, Alert, Navbar)
+│   ├── features/              # Các tính năng chính
+│   │   ├── auth/              # Module xác thực
+│   │   │   ├── login/         # Giao diện Login (Hình minh họa AI bên trái/phải)
+│   │   │   └── register/      # Form đăng ký thoáng đãng
+│   │   └── chatbot/           # Module trung tâm
+│   │       ├── chat-window/   # Khung chat chính
+│   │       ├── chat-input/    # Ô nhập liệu & nút gửi
+│   │       └── chat-history/  # Danh sách các lần tư vấn trước
+│   ├── models/                # Typescript Interfaces (User, Message)
+│   └── assets/                # Images (AI-Medical-Illus.svg), Icons
+├── src/styles.scss            # Định nghĩa màu chủ đạo (Blue-Medical)
+└── angular.json
+
