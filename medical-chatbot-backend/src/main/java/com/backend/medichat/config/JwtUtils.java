@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Component
 public class JwtUtils {
-    private final String jwtSecret = "ChatbotMedicalAISecretKeyMustBeVeryLongAndSecure123456"; // Chuỗi bí mật
+    private final String jwtSecret = "ChatbotMedicalAISecretKeyMustBeVeryLongAndSecure123456";
     private final int jwtExpirationMs = 86400000;
 
     private final Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
