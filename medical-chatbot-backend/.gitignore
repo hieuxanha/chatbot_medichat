@@ -48,3 +48,6 @@ mvnw.cmd
 # Chặn các file hệ thống
 .DS_Store
 Thumbs.db
+
+src/main/resources/*.csv
+src/main/resources/*.json
