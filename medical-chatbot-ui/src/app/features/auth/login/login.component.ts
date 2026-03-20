@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -45,11 +47,36 @@ export class LoginComponent implements OnInit {
 
     // Giả lập gọi API (Sau này Hiếu sẽ gọi AuthService ở đây)
     console.log('Dữ liệu đăng nhập:', this.loginForm.value);
-    
-    setTimeout(() => {
-      this.isLoading = false;
-      // Giả sử đăng nhập thành công, chuyển hướng sang trang Chat
-      this.router.navigate(['/chat']);
-    }, 1500);
+
+    const credentials = {
+      email: this.loginForm.value.email,
+      password: this.loginForm.value.password
+    };
+
+   // Gọi API Đăng nhập thật từ Backend
+    this.authService.login(credentials).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        
+        // 1. Lưu Token và thông tin User vào localStorage
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user_email', response.email);
+        localStorage.setItem('user_name', response.fullName);
+
+        console.log('Đăng nhập thành công, nhận Token:', response.token);
+
+        // 2. Chuyển hướng sang trang Chat
+        this.router.navigate(['/chat']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        // Hiển thị thông báo lỗi từ Backend (ví dụ: Sai mật khẩu)
+        this.errorMessage = err.error?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại!';
+        console.error('Lỗi đăng nhập:', err);
+      }
+      
+    });
+  
   }
+
 }

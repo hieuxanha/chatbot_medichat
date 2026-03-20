@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -14,7 +15,10 @@ export class RegisterComponent implements OnInit {
   isLoading = false;
   showPassword = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  constructor(private fb: FormBuilder, 
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
@@ -37,21 +41,37 @@ export class RegisterComponent implements OnInit {
 
   get f() { return this.registerForm.controls; }
 
-  onSubmit(): void {
+ onSubmit(): void {
+ 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
-    console.log('Dữ liệu đăng ký:', this.registerForm.value);
 
-    // Giả lập gọi API đăng ký
-    setTimeout(() => {
-      this.isLoading = false;
-      alert('Đăng ký thành công!');
-      this.router.navigate(['/login']);
-    }, 2000);
+    
+    const registerData = {
+      fullName: this.registerForm.value.fullName,
+      email: this.registerForm.value.email, 
+      password: this.registerForm.value.password,
+      phone: this.registerForm.value.phone
+    };
+
+    
+    this.authService.register(registerData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        alert('Đăng ký tài khoản thành công!');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        // Hiển thị lỗi từ Backend (ví dụ: Email đã tồn tại)
+        alert(err.error?.message || 'Có lỗi xảy ra khi đăng ký!');
+        console.error('Lỗi đăng ký:', err);
+      },
+    });
   }
 
   togglePassword() {

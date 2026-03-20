@@ -1,7 +1,8 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild,PLATFORM_ID, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { HttpClient } from '@angular/common/http'; // THÊM DÒNG NÀY
+import { isPlatformBrowser } from '@angular/common';
 type Role = 'assistant' | 'user';
 
 interface Message {
@@ -18,33 +19,75 @@ interface Message {
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
   @ViewChild('scrollWrap') scrollWrap!: ElementRef<HTMLDivElement>;
 
   messageText = '';
-  messages: Message[] = [
-    { id: 1, role: 'assistant', text: "Hello John! I'm here to help you analyze your symptoms. How are you feeling today? Please describe any discomfort or health concerns you've noticed.", time: '10:24 AM' },
-    { id: 2, role: 'user', text: "I've had a persistent headache behind my eyes and some mild nausea since I woke up this morning.", time: '10:25 AM' },
-    { id: 3, role: 'assistant', text: `Based on your symptoms (headache behind eyes and nausea), it could be several things. Let's look at the most likely possibilities:`, time: '10:25 AM' }
-  ];
+  messages: Message[] = [];
+  private nextId = 1;
+  userName = 'John Doe'; // Hiếu có thể lấy từ localStorage.getItem('user_name')
 
-  private nextId = 4;
+  constructor(private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {} // KHAI BÁO HTTP TẠI ĐÂY
 
+  ngOnInit(): void {
+    // Hiếu có thể lấy tên user thật đã lưu lúc Login
+    this.userName = localStorage.getItem('user_name') || 'Người dùng';
+    
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.userName = localStorage.getItem('user_name') || 'Người dùng';
+    }
+
+    // Tin nhắn chào mừng mặc định
+    this.messages.push({
+      id: this.nextId++,
+      role: 'assistant',
+      text: `Xin chào ${this.userName}! Tôi là trợ lý MediAI. Bạn đang cảm thấy thế nào? Hãy mô tả triệu chứng của bạn nhé.`,
+      time: this.getCurrentTime()
+    });
+  }
+
+  // Hàm gọi API thật đến Backend Spring Boot
   sendMessage() {
     const text = this.messageText.trim();
     if (!text) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    const time = this.getCurrentTime();
+
+    // 1. Hiển thị tin nhắn của User
     this.messages.push({ id: this.nextId++, role: 'user', text, time });
     this.messageText = '';
     this.scrollToBottom();
 
-    // Simulate assistant reply
-    setTimeout(() => {
-      this.messages.push({ id: this.nextId++, role: 'assistant', text: 'Thank you — I see. Can you tell me when the pain started and any known triggers?', time });
-      this.scrollToBottom();
-    }, 800);
+    // 2. Gọi API Backend (Endpoint /api/chat/ask như mình đã viết ở Backend)
+    // Lưu ý: Đổi URL nếu Hiếu đặt tên endpoint khác
+    this.http.post<any>('http://localhost:8080/api/chat/ask', { message: text }).subscribe({
+      next: (res) => {
+        this.messages.push({ 
+          id: this.nextId++, 
+          role: 'assistant', 
+          text: res.text, 
+          time: res.time || this.getCurrentTime() 
+        });
+        this.scrollToBottom();
+      },
+      error: (err) => {
+        console.error('Lỗi kết nối AI:', err);
+        this.messages.push({ 
+          id: this.nextId++, 
+          role: 'assistant', 
+          text: 'Rất tiếc, kết nối với AI bị gián đoạn. Hiếu kiểm tra Backend đã chạy chưa nhé!', 
+          time: this.getCurrentTime() 
+        });
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  private getCurrentTime(): string {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   private scrollToBottom() {
@@ -53,6 +96,6 @@ export class ChatComponent {
         const el = this.scrollWrap?.nativeElement;
         if (el) el.scrollTop = el.scrollHeight;
       } catch (e) {}
-    }, 50);
+    }, 100);
   }
 }
