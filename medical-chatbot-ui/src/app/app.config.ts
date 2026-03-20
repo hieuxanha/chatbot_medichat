@@ -1,13 +1,16 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http'; 
+import { provideHttpClient } from '@angular/common/http';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideMarkdown } from 'ngx-markdown'; // Import hàm này
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }),
-     provideRouter(routes), 
-     provideHttpClient(),
-     provideClientHydration(withEventReplay())
-    ]
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient(),
+    provideClientHydration(withEventReplay()),
+    provideMarkdown() 
+  ]
 };

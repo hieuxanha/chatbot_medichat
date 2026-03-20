@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http'; // THÊM DÒNG NÀY
 import { isPlatformBrowser } from '@angular/common';
 type Role = 'assistant' | 'user';
+import { MarkdownComponent } from 'ngx-markdown'; // Import component này
 
 interface Message {
   id: number;
@@ -15,7 +16,7 @@ interface Message {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,MarkdownComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
